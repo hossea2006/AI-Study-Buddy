@@ -79,8 +79,8 @@ export const getStudyMaterials = async (req: AuthRequest, res: Response) => {
       include: {
         _count: {
           select: {
-            flashcards: true,
-            quizzes: true,
+            Flashcard: true,
+            Quiz: true,
           },
         },
       },
@@ -103,8 +103,8 @@ export const getStudyMaterialById = async (req: AuthRequest, res: Response) => {
     const material = await prisma.studyMaterial.findUnique({
       where: { id, userId: req.userId },
       include: {
-        flashcards: true,
-        quizzes: true,
+        Flashcard: true,
+        Quiz: true,
       },
     });
 

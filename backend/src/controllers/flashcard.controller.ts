@@ -43,7 +43,7 @@ export const getFlashcards = async (req: AuthRequest, res: Response) => {
     const flashcards = await prisma.flashcard.findMany({
       where: { userId: req.userId },
       include: {
-        studyMaterial: {
+        StudyMaterial: {
           select: {
             id: true,
             title: true,
@@ -69,7 +69,7 @@ export const getDueFlashcards = async (req: AuthRequest, res: Response) => {
     const dueFlashcards = await prisma.flashcard.findMany({
       where: {
         userId: req.userId,
-        reviews: {
+        FlashcardReview: {
           some: {
             nextReview: {
               lte: now,
@@ -78,7 +78,7 @@ export const getDueFlashcards = async (req: AuthRequest, res: Response) => {
         },
       },
       include: {
-        reviews: {
+        FlashcardReview: {
           orderBy: { createdAt: 'desc' },
           take: 1,
         },

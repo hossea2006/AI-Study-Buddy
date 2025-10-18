@@ -18,7 +18,7 @@ export const generateQuiz = async (req: AuthRequest, res: Response) => {
         title: title || 'Generated Quiz',
         userId: req.userId!,
         studyMaterialId: studyMaterialId || null,
-        questions: {
+        QuizQuestion: {
           create: generatedQuestions.map((q: any) => ({
             question: q.question,
             options: q.options,
@@ -28,7 +28,7 @@ export const generateQuiz = async (req: AuthRequest, res: Response) => {
         },
       },
       include: {
-        questions: true,
+        QuizQuestion: true,
       },
     });
 
@@ -48,8 +48,8 @@ export const getQuizzes = async (req: AuthRequest, res: Response) => {
       include: {
         _count: {
           select: {
-            questions: true,
-            attempts: true,
+            QuizQuestion: true,
+            QuizAttempt: true,
           },
         },
       },
@@ -72,8 +72,8 @@ export const getQuizById = async (req: AuthRequest, res: Response) => {
     const quiz = await prisma.quiz.findUnique({
       where: { id, userId: req.userId },
       include: {
-        questions: true,
-        attempts: {
+        QuizQuestion: true,
+        QuizAttempt: {
           orderBy: { completedAt: 'desc' },
         },
       },
@@ -95,25 +95,32 @@ export const getQuizById = async (req: AuthRequest, res: Response) => {
 export const submitQuizAttempt = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { answers } = req.body; // { questionId: userAnswer }
+    const { answers } = req.body; // Array of { questionId, answer }
 
     const quiz = await prisma.quiz.findUnique({
       where: { id, userId: req.userId },
-      include: { questions: true },
+      include: { QuizQuestion: true },
     });
 
     if (!quiz) {
       return res.status(404).json({ message: 'Quiz not found' });
     }
 
+    // Convert answers array to a map for easier lookup
+    const answersMap = new Map<string, string>(
+      answers.map((a: any) => [a.questionId, a.answer as string])
+    );
+
     let correctCount = 0;
-    const answerData = quiz.questions.map((question) => {
-      const userAnswer = answers[question.id];
+    const answerData = quiz.QuizQuestion.map((question) => {
+      const userAnswer = answersMap.get(question.id) ?? '';
       const isCorrect = userAnswer === question.correctAnswer;
       if (isCorrect) correctCount++;
 
       return {
-        questionId: question.id,
+        QuizQuestion: {
+          connect: { id: question.id }
+        },
         userAnswer,
         isCorrect,
       };
@@ -123,15 +130,15 @@ export const submitQuizAttempt = async (req: AuthRequest, res: Response) => {
       data: {
         quizId: id,
         score: correctCount,
-        totalQuestions: quiz.questions.length,
-        answers: {
+        totalQuestions: quiz.QuizQuestion.length,
+        QuizAnswer: {
           create: answerData,
         },
       },
       include: {
-        answers: {
+        QuizAnswer: {
           include: {
-            question: true,
+            QuizQuestion: true,
           },
         },
       },

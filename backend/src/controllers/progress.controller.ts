@@ -31,7 +31,7 @@ export const getAnalytics = async (req: AuthRequest, res: Response) => {
 
     const recentAttempts = await prisma.quizAttempt.findMany({
       where: {
-        quiz: {
+        Quiz: {
           userId: req.userId,
         },
       },

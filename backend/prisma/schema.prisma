@@ -8,20 +8,20 @@ datasource db {
 }
 
 model Flashcard {
-  id              String            @id
+  id              String            @id @default(uuid())
   question        String
   answer          String
   userId          String
   studyMaterialId String?
   createdAt       DateTime          @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime          @updatedAt
   StudyMaterial   StudyMaterial?    @relation(fields: [studyMaterialId], references: [id], onDelete: Cascade)
   User            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   FlashcardReview FlashcardReview[]
 }
 
 model FlashcardReview {
-  id          String    @id
+  id          String    @id @default(uuid())
   flashcardId String
   quality     Int
   nextReview  DateTime
@@ -33,7 +33,7 @@ model FlashcardReview {
 }
 
 model Progress {
-  id                 String   @id
+  id                 String   @id @default(uuid())
   userId             String
   date               DateTime @default(now())
   studyMinutes       Int
@@ -46,12 +46,12 @@ model Progress {
 }
 
 model Quiz {
-  id              String         @id
+  id              String         @id @default(uuid())
   title           String
   userId          String
   studyMaterialId String?
   createdAt       DateTime       @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime       @updatedAt
   StudyMaterial   StudyMaterial? @relation(fields: [studyMaterialId], references: [id], onDelete: Cascade)
   User            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   QuizAttempt     QuizAttempt[]
@@ -59,7 +59,7 @@ model Quiz {
 }
 
 model QuizAnswer {
-  id           String       @id
+  id           String       @id @default(uuid())
   attemptId    String
   questionId   String
   userAnswer   String
@@ -70,7 +70,7 @@ model QuizAnswer {
 }
 
 model QuizAttempt {
-  id             String       @id
+  id             String       @id @default(uuid())
   quizId         String
   score          Int
   totalQuestions Int
@@ -80,7 +80,7 @@ model QuizAttempt {
 }
 
 model QuizQuestion {
-  id            String       @id
+  id            String       @id @default(uuid())
   quizId        String
   question      String
   options       String[]
@@ -92,21 +92,21 @@ model QuizQuestion {
 }
 
 model StudyMaterial {
-  id        String      @id
+  id        String      @id @default(uuid())
   title     String
   content   String
   fileUrl   String?
   fileType  String?
   userId    String
   createdAt DateTime    @default(now())
-  updatedAt DateTime
+  updatedAt DateTime    @updatedAt
   Flashcard Flashcard[]
   Quiz      Quiz[]
   User      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model StudySession {
-  id        String    @id
+  id        String    @id @default(uuid())
   userId    String
   topic     String
   duration  Int
@@ -117,12 +117,12 @@ model StudySession {
 }
 
 model User {
-  id            String          @id
+  id            String          @id @default(uuid())
   email         String          @unique
   password      String
   name          String
   createdAt     DateTime        @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime        @updatedAt
   Flashcard     Flashcard[]
   Progress      Progress[]
   Quiz          Quiz[]
