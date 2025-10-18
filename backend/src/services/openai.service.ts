@@ -10,18 +10,37 @@ export const generateFlashcards = async (content: string, count: number = 10) =>
     messages: [
       {
         role: 'system',
-        content: 'You are a helpful study assistant that generates flashcards from study materials. Generate flashcards in JSON format with "question" and "answer" fields.',
+        content: `You are an expert educational content creator specializing in creating effective study flashcards.
+Your flashcards should:
+- Focus on key concepts and important facts
+- Ask clear, specific questions
+- Provide concise, accurate answers
+- Cover different aspects of the material (definitions, examples, applications, comparisons)
+- Be appropriate for active recall practice
+Return ONLY valid JSON, no additional text.`,
       },
       {
         role: 'user',
-        content: `Generate ${count} flashcards from the following study material:\n\n${content}\n\nReturn only a JSON array of flashcards with this format: [{"question": "...", "answer": "..."}]`,
+        content: `Generate exactly ${count} high-quality flashcards from the following study material:
+
+${content}
+
+Return ONLY a JSON array in this exact format:
+[{"question": "What is...?", "answer": "..."}]
+
+Make sure to:
+1. Cover the most important concepts
+2. Use clear, direct language
+3. Vary question types (what, why, how, when, compare, etc.)`,
       },
     ],
     temperature: 0.7,
+    response_format: { type: "json_object" },
   });
 
-  const flashcardsText = response.choices[0].message.content || '[]';
-  return JSON.parse(flashcardsText);
+  const flashcardsText = response.choices[0].message.content || '{"flashcards":[]}';
+  const parsed = JSON.parse(flashcardsText);
+  return parsed.flashcards || parsed;
 };
 
 export const generateQuiz = async (content: string, numQuestions: number = 5) => {
@@ -30,18 +49,42 @@ export const generateQuiz = async (content: string, numQuestions: number = 5) =>
     messages: [
       {
         role: 'system',
-        content: 'You are a helpful study assistant that generates multiple-choice quiz questions from study materials. Generate questions in JSON format.',
+        content: `You are an expert educational assessment creator. Create high-quality multiple-choice questions that:
+- Test true understanding, not just memorization
+- Have 4 plausible options with only ONE clearly correct answer
+- Include distractors that address common misconceptions
+- Provide clear explanations for the correct answer
+- Cover different cognitive levels (recall, understanding, application, analysis)
+Return ONLY valid JSON, no additional text.`,
       },
       {
         role: 'user',
-        content: `Generate ${numQuestions} multiple-choice questions from the following material:\n\n${content}\n\nReturn only a JSON array with this format: [{"question": "...", "options": ["A", "B", "C", "D"], "correctAnswer": "A", "explanation": "..."}]`,
+        content: `Generate exactly ${numQuestions} multiple-choice questions from this study material:
+
+${content}
+
+Return ONLY a JSON array in this exact format:
+[{
+  "question": "Clear, specific question?",
+  "options": ["Option A", "Option B", "Option C", "Option D"],
+  "correctAnswer": "Option A",
+  "explanation": "Why this answer is correct and others are wrong"
+}]
+
+Requirements:
+1. Make questions challenging but fair
+2. Ensure options are all plausible
+3. Provide detailed explanations
+4. Test different aspects of the material`,
       },
     ],
     temperature: 0.7,
+    response_format: { type: "json_object" },
   });
 
-  const quizText = response.choices[0].message.content || '[]';
-  return JSON.parse(quizText);
+  const quizText = response.choices[0].message.content || '{"questions":[]}';
+  const parsed = JSON.parse(quizText);
+  return parsed.questions || parsed;
 };
 
 export const explainConcept = async (concept: string, level: string = 'simple') => {

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run prisma:generate:*)",
+      "Bash(npm run prisma:migrate:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm run dev)",
+      "Bash(npm install pdf-parse zod)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

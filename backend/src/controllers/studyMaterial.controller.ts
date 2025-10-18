@@ -1,6 +1,9 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import prisma from '../utils/prisma';
+import { extractTextFromPDF } from '../utils/pdfParser';
+import path from 'path';
+import fs from 'fs/promises';
 
 export const createStudyMaterial = async (req: AuthRequest, res: Response) => {
   try {
@@ -18,6 +21,50 @@ export const createStudyMaterial = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json({
       success: true,
+      data: material,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const uploadStudyMaterial = async (req: AuthRequest, res: Response) => {
+  try {
+    const { title } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    let content = '';
+    const filePath = file.path;
+    const fileType = path.extname(file.originalname).toLowerCase();
+
+    // Extract text based on file type
+    if (fileType === '.pdf') {
+      content = await extractTextFromPDF(filePath);
+    } else if (fileType === '.txt') {
+      content = await fs.readFile(filePath, 'utf-8');
+    } else {
+      // For .doc and .docx, you'd need additional libraries
+      content = 'File uploaded successfully. Text extraction for this format coming soon.';
+    }
+
+    // Create study material
+    const material = await prisma.studyMaterial.create({
+      data: {
+        title: title || file.originalname,
+        content: content,
+        fileUrl: `/uploads/${file.filename}`,
+        fileType: fileType,
+        userId: req.userId!,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Study material uploaded successfully',
       data: material,
     });
   } catch (error: any) {
