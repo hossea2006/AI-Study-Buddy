@@ -43,7 +43,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/AI-Study-Buddy">
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" />} />
