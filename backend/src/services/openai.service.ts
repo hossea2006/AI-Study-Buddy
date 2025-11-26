@@ -1,11 +1,18 @@
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI;
+
+const getOpenAI = () => {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || 'sk-placeholder',
+    });
+  }
+  return openai;
+};
 
 export const generateFlashcards = async (content: string, count: number = 10) => {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {
@@ -44,7 +51,7 @@ Make sure to:
 };
 
 export const generateQuiz = async (content: string, numQuestions: number = 5) => {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {
@@ -88,7 +95,7 @@ Requirements:
 };
 
 export const explainConcept = async (concept: string, level: string = 'simple') => {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {
@@ -107,7 +114,7 @@ export const explainConcept = async (concept: string, level: string = 'simple') 
 };
 
 export const generatePracticeProblems = async (topic: string, count: number = 5, difficulty: string = 'medium') => {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {
@@ -129,7 +136,7 @@ export const generatePracticeProblems = async (topic: string, count: number = 5,
 export const provideEssayFeedback = async (essay: string, rubric?: string) => {
   const rubricText = rubric ? `\n\nGrading Rubric:\n${rubric}` : '';
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {
@@ -149,7 +156,7 @@ export const provideEssayFeedback = async (essay: string, rubric?: string) => {
 };
 
 export const summarizeText = async (text: string, maxLength: number = 200) => {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {
